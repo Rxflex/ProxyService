@@ -557,6 +557,39 @@
 
         // Initialize
         switchTab('proxies');
+
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `px-4 py-2 rounded shadow-lg text-white font-semibold flex items-center space-x-2 transition-all duration-300 transform translate-x-full opacity-0`;
+            
+            let bgColor = 'bg-blue-600';
+            if (type === 'success') bgColor = 'bg-green-600';
+            else if (type === 'error') bgColor = 'bg-red-600';
+            else if (type === 'warning') bgColor = 'bg-yellow-600';
+
+            toast.classList.add(bgColor);
+
+            toast.innerHTML = `
+                <span>${message}</span>
+            `;
+
+            toastContainer.appendChild(toast);
+
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full', 'opacity-0');
+                toast.classList.add('translate-x-0', 'opacity-100');
+            }, 100);
+
+            // Animate out and remove after 5 seconds
+            setTimeout(() => {
+                toast.classList.remove('translate-x-0', 'opacity-100');
+                toast.classList.add('translate-x-full', 'opacity-0');
+                toast.addEventListener('transitionend', () => toast.remove());
+            }, 5000);
+        }
     </script>
 </body>
 </html> 
