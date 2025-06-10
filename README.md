@@ -39,11 +39,11 @@ npm install
 npm start
 ```
 
-The server will start on port 3000 by default. You can change this by setting the `PORT` environment variable.
+The server will start on port 8888 by default. You can change this by setting the `PORT` environment variable.
 
 ## Admin Access
 
-- URL: `http://localhost:3000/admin`
+- URL: `http://localhost:8888/admin`
 - Username: `admin`
 - Password: `admin123`
 
@@ -58,7 +58,7 @@ docker build -t proxy-service .
 
 2. Run the container:
 ```bash
-docker run -p 3000:3000 proxy-service
+docker run -p 8888:8888 proxy-service
 ```
 
 ## Database

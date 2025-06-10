@@ -5,7 +5,7 @@ const Database = require('better-sqlite3');
 const net = require('net');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8888;
 
 // Middleware
 app.use(express.json());
