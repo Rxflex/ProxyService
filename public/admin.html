@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proxy Management Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            'bg-primary': '#1a1b1e',
+                            'bg-secondary': '#25262b',
+                            'bg-tertiary': '#2c2e33',
+                            'text-primary': '#ffffff',
+                            'text-secondary': '#a1a1aa',
+                            'border': '#2c2e33'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-dark-bg-primary text-dark-text-primary min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-8 text-white">Proxy Management Admin Panel</h1>
+        
+        <!-- Add New Proxy Form -->
+        <div class="bg-dark-bg-secondary rounded-lg shadow-lg p-6 mb-8 border border-dark-border">
+            <h2 class="text-xl font-semibold mb-4 text-white">Add New Proxy</h2>
+            <form id="addProxyForm" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-dark-text-secondary">Host</label>
+                        <input type="text" name="host" required 
+                            class="mt-1 block w-full rounded-md bg-dark-bg-tertiary border-dark-border text-white 
+                            focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-dark-text-secondary">Port</label>
+                        <input type="number" name="port" required 
+                            class="mt-1 block w-full rounded-md bg-dark-bg-tertiary border-dark-border text-white 
+                            focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-dark-text-secondary">Username</label>
+                        <input type="text" name="username" 
+                            class="mt-1 block w-full rounded-md bg-dark-bg-tertiary border-dark-border text-white 
+                            focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-dark-text-secondary">Password</label>
+                        <input type="password" name="password" 
+                            class="mt-1 block w-full rounded-md bg-dark-bg-tertiary border-dark-border text-white 
+                            focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+                </div>
+                <button type="submit" 
+                    class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors duration-200">
+                    Add Proxy
+                </button>
+            </form>
+        </div>
+
+        <!-- Bulk Import Form -->
+        <div class="bg-dark-bg-secondary rounded-lg shadow-lg p-6 mb-8 border border-dark-border">
+            <h2 class="text-xl font-semibold mb-4 text-white">Bulk Import Proxies</h2>
+            <form id="bulkImportForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-dark-text-secondary mb-2">Paste proxies (one per line)</label>
+                    <p class="text-sm text-dark-text-secondary mb-2">Format: host:port:username:password</p>
+                    <textarea name="proxies" rows="10" required 
+                        class="mt-1 block w-full rounded-md bg-dark-bg-tertiary border-dark-border text-white 
+                        focus:border-indigo-500 focus:ring-indigo-500"
+                        placeholder="193.3.176.6:12323:14aec3db0b847:ac5b9d113c"></textarea>
+                </div>
+                <button type="submit" 
+                    class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors duration-200">
+                    Import Proxies
+                </button>
+            </form>
+            <div id="importResults" class="mt-4 hidden">
+                <h3 class="font-semibold mb-2 text-white">Import Results:</h3>
+                <div class="text-sm">
+                    <p>Added: <span id="addedCount" class="text-green-400">0</span></p>
+                    <p>Skipped (duplicates): <span id="skippedCount" class="text-yellow-400">0</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Proxy Lists -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Used Proxies -->
+            <div class="bg-dark-bg-secondary rounded-lg shadow-lg p-6 border border-dark-border">
+                <h2 class="text-xl font-semibold mb-4 text-white">Used Proxies</h2>
+                <div id="usedProxies" class="space-y-4">
+                    <!-- Used proxies will be populated here -->
+                </div>
+            </div>
+
+            <!-- Free Proxies -->
+            <div class="bg-dark-bg-secondary rounded-lg shadow-lg p-6 border border-dark-border">
+                <h2 class="text-xl font-semibold mb-4 text-white">Free Proxies</h2>
+                <div id="freeProxies" class="space-y-4">
+                    <!-- Free proxies will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Rotation History -->
+        <div class="bg-dark-bg-secondary rounded-lg shadow-lg p-6 mt-8 border border-dark-border">
+            <h2 class="text-xl font-semibold mb-4 text-white">Rotation History</h2>
+            <div id="rotationHistory" class="space-y-4">
+                <!-- Rotation history will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fetch and display proxies
+        async function loadProxies() {
+            try {
+                const response = await fetch('/api/admin/proxies');
+                const proxies = await response.json();
+                
+                const usedProxies = proxies.filter(p => p.is_used);
+                const freeProxies = proxies.filter(p => !p.is_used);
+                
+                document.getElementById('usedProxies').innerHTML = usedProxies.map(proxy => `
+                    <div class="border border-dark-border rounded-lg p-4 bg-dark-bg-tertiary">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="font-medium text-white">${proxy.host}:${proxy.port}</p>
+                                <p class="text-sm text-dark-text-secondary">Email: ${proxy.email}</p>
+                            </div>
+                            <button onclick="rotateProxy('${proxy.email}')" 
+                                class="bg-yellow-600 text-white px-3 py-1 rounded hover:bg-yellow-700 transition-colors duration-200">
+                                Rotate
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+                
+                document.getElementById('freeProxies').innerHTML = freeProxies.map(proxy => `
+                    <div class="border border-dark-border rounded-lg p-4 bg-dark-bg-tertiary">
+                        <p class="font-medium text-white">${proxy.host}:${proxy.port}</p>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading proxies:', error);
+            }
+        }
+
+        // Add new proxy
+        document.getElementById('addProxyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            try {
+                await fetch('/api/admin/proxies', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+                
+                e.target.reset();
+                loadProxies();
+            } catch (error) {
+                console.error('Error adding proxy:', error);
+            }
+        });
+
+        // Bulk import proxies
+        document.getElementById('bulkImportForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const proxiesText = formData.get('proxies');
+            
+            // Parse proxies
+            const proxies = proxiesText.split('\n')
+                .map(line => line.trim())
+                .filter(line => line)
+                .map(line => {
+                    const [host, port, username, password] = line.split(':');
+                    return { host, port, username, password };
+                });
+            
+            try {
+                const response = await fetch('/api/admin/proxies/bulk', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ proxies }),
+                });
+                
+                const result = await response.json();
+                
+                // Show results
+                document.getElementById('importResults').classList.remove('hidden');
+                document.getElementById('addedCount').textContent = result.added;
+                document.getElementById('skippedCount').textContent = result.skipped;
+                
+                e.target.reset();
+                loadProxies();
+            } catch (error) {
+                console.error('Error importing proxies:', error);
+            }
+        });
+
+        // Rotate proxy
+        async function rotateProxy(email) {
+            const reason = prompt('Enter rotation reason:');
+            if (!reason) return;
+            
+            try {
+                await fetch(`/api/admin/proxies/${email}/rotate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ reason }),
+                });
+                
+                loadProxies();
+            } catch (error) {
+                console.error('Error rotating proxy:', error);
+            }
+        }
+
+        // Load initial data
+        loadProxies();
+    </script>
+</body>
+</html> 
