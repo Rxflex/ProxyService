@@ -271,7 +271,7 @@
                                     </button>` 
                                     : ''
                                 }
-                                ${proxy.last_checked_at ? `<p class="text-xs text-dark-text-secondary">Last checked: ${new Date(proxy.last_checked_at).toLocaleString()}</p>` : '<p class="text-xs text-dark-text-secondary">Status: Not checked yet</p>'}
+                                ${proxy.last_checked_at ? `<p class="text-xs text-dark-text-secondary">Last checked: ${new Date(proxy.last_checked_at + 'Z').toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' })}</p>` : '<p class="text-xs text-dark-text-secondary">Status: Not checked yet</p>'}
                             </div>
                             <div class="flex space-x-2">
                                 <button onclick="rotateProxy('${proxy.email}')" 
@@ -306,7 +306,7 @@
                                     </button>` 
                                     : ''
                                 }
-                                ${proxy.last_checked_at ? `<p class="text-xs text-dark-text-secondary">Last checked: ${new Date(proxy.last_checked_at).toLocaleString()}</p>` : '<p class="text-xs text-dark-text-secondary">Status: Not checked yet</p>'}
+                                ${proxy.last_checked_at ? `<p class="text-xs text-dark-text-secondary">Last checked: ${new Date(proxy.last_checked_at + 'Z').toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' })}</p>` : '<p class="text-xs text-dark-text-secondary">Status: Not checked yet</p>'}
                             </div>
                             <div class="flex space-x-2">
                                 <button onclick="editProxy(${JSON.stringify(proxy).replace(/"/g, '&quot;')})" 
@@ -366,7 +366,7 @@
                                     <div class="text-sm space-y-1">
                                         <p class="text-dark-text-secondary">Email: ${entry.email}</p>
                                         <p class="text-dark-text-secondary">Reason: ${entry.reason || 'No reason provided'}</p>
-                                        <p class="text-dark-text-secondary">Date: ${new Date(entry.created_at).toLocaleString()}</p>
+                                        <p class="text-dark-text-secondary">Date: ${new Date(entry.created_at + 'Z').toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' })}</p>
                                     </div>
                                 </div>
                                 <div class="text-sm text-dark-text-secondary">
