@@ -140,8 +140,12 @@
 
                 <!-- History Tab -->
                 <div id="historyContent" class="h-full overflow-y-auto p-4">
-                    <div class="sticky top-0 bg-dark-bg-secondary py-4 mb-4 border-b border-dark-border">
+                    <div class="sticky top-0 bg-dark-bg-secondary py-4 mb-4 border-b border-dark-border flex justify-between items-center">
                         <h2 class="text-lg font-semibold text-white text-center">Rotation History</h2>
+                        <button onclick="clearRotationHistory()" 
+                            class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition-colors duration-200 text-sm">
+                            Clear History
+                        </button>
                     </div>
                     <div id="rotationHistory" class="space-y-4">
                         <!-- Rotation history will be populated here -->
@@ -613,6 +617,29 @@
                 loadRotationHistory(); // Also refresh history as status might affect it conceptually
             } catch (error) {
                 showToast(error.message || 'Error reactivating proxy', 'error');
+            }
+        }
+
+        // Clear rotation history
+        async function clearRotationHistory() {
+            if (!confirm('Are you sure you want to clear the entire rotation history?')) return;
+
+            try {
+                const response = await fetch('/api/admin/rotation-history', {
+                    method: 'DELETE',
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error);
+                }
+
+                showToast('Rotation history cleared successfully!', 'success');
+                currentPageHistory = 1;
+                hasMoreHistory = true;
+                loadRotationHistory();
+            } catch (error) {
+                showToast(error.message || 'Error clearing history', 'error');
             }
         }
 

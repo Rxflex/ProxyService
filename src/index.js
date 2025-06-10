@@ -341,6 +341,12 @@ app.delete('/api/admin/proxies/:id', adminAuth, (req, res) => {
     res.json({ message: 'Proxy deleted successfully' });
 });
 
+// Add endpoint for clearing rotation history
+app.delete('/api/admin/rotation-history', adminAuth, (req, res) => {
+    db.prepare('DELETE FROM proxy_history').run();
+    res.json({ message: 'Rotation history cleared successfully' });
+});
+
 // Add endpoint for reactivating proxy
 app.post('/api/admin/proxies/:id/reactivate', adminAuth, (req, res) => {
     const { id } = req.params;
