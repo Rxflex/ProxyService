@@ -254,7 +254,14 @@
                             </div>
                             <div>
                                 <p class="text-sm text-dark-text-secondary">Email: ${proxy.email}</p>
-                                ${!proxy.is_active ? '<p class="text-sm text-red-400">Inactive</p>' : ''}
+                                ${!proxy.is_active ? 
+                                    `<p class="text-sm text-red-400">Inactive</p>
+                                    <button onclick="reactivateProxy(${proxy.id})" 
+                                        class="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700 transition-colors duration-200 text-xs mt-1">
+                                        Reactivate
+                                    </button>` 
+                                    : ''
+                                }
                                 ${proxy.last_checked_at ? `<p class="text-xs text-dark-text-secondary">Last checked: ${new Date(proxy.last_checked_at).toLocaleString()}</p>` : '<p class="text-xs text-dark-text-secondary">Status: Not checked yet</p>'}
                             </div>
                             <div class="flex space-x-2">
@@ -282,7 +289,14 @@
                                 }
                             </div>
                             <div>
-                                ${!proxy.is_active ? '<p class="text-sm text-red-400">Inactive</p>' : ''}
+                                ${!proxy.is_active ? 
+                                    `<p class="text-sm text-red-400">Inactive</p>
+                                    <button onclick="reactivateProxy(${proxy.id})" 
+                                        class="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700 transition-colors duration-200 text-xs mt-1">
+                                        Reactivate
+                                    </button>` 
+                                    : ''
+                                }
                                 ${proxy.last_checked_at ? `<p class="text-xs text-dark-text-secondary">Last checked: ${new Date(proxy.last_checked_at).toLocaleString()}</p>` : '<p class="text-xs text-dark-text-secondary">Status: Not checked yet</p>'}
                             </div>
                             <div class="flex space-x-2">
@@ -554,6 +568,45 @@
                 alert(error.message || 'Error deleting proxy');
             }
         }
+
+        // Reactivate proxy
+        async function reactivateProxy(id) {
+            if (!confirm('Are you sure you want to reactivate this proxy?')) return;
+            
+            try {
+                const response = await fetch(`/api/admin/proxies/${id}/reactivate`, {
+                    method: 'POST',
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error);
+                }
+                
+                showToast('Proxy reactivated successfully!', 'success');
+                currentPage = 1;
+                hasMore = true;
+                loadProxies();
+                loadRotationHistory(); // Also refresh history as status might affect it conceptually
+            } catch (error) {
+                showToast(error.message || 'Error reactivating proxy', 'error');
+            }
+        }
+
+        // Auto-refresh data every 30 seconds
+        setInterval(() => {
+            if (document.getElementById('proxiesContent').classList.contains('hidden')) {
+                // Only refresh history if history tab is active
+                currentPage = 1;
+                hasMore = true;
+                loadRotationHistory();
+            } else {
+                // Only refresh proxies if proxies tab is active
+                currentPage = 1;
+                hasMore = true;
+                loadProxies();
+            }
+        }, 30 * 1000); // 30 seconds
 
         // Initialize
         switchTab('proxies');

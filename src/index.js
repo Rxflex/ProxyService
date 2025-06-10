@@ -341,6 +341,19 @@ app.delete('/api/admin/proxies/:id', adminAuth, (req, res) => {
     res.json({ message: 'Proxy deleted successfully' });
 });
 
+// Add endpoint for reactivating proxy
+app.post('/api/admin/proxies/:id/reactivate', adminAuth, (req, res) => {
+    const { id } = req.params;
+
+    const proxy = db.prepare('SELECT * FROM proxies WHERE id = ?').get(id);
+    if (!proxy) {
+        return res.status(404).json({ error: 'Proxy not found' });
+    }
+
+    db.prepare('UPDATE proxies SET is_active = 1, is_used = 0, email = NULL WHERE id = ?').run(id);
+    res.json({ message: 'Proxy reactivated successfully' });
+});
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 }); 
