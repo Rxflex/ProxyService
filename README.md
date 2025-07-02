@@ -94,12 +94,11 @@ DELETE /api/admin/proxies/:id
 
 ## Docker и CI/CD
 
-Dockerfile уже присутствует. Для автоматической сборки и публикации Docker-образа на архитектуры linux/amd64 и windows/amd64 добавлен workflow GitHub Actions (см. `.github/workflows/docker-publish.yml`).
+Dockerfile уже присутствует. Для автоматической сборки и публикации Docker-образа на архитектуру linux/amd64 добавлен workflow GitHub Actions (см. `.github/workflows/docker-publish.yml`).
 
 Образ публикуется в GitHub Container Registry (ghcr.io).
 
 **Пример получения и запуска образа:**
 ```bash
-docker pull ghcr.io/<ваш_репозиторий>/proxy-service:latest
-# Например:
-docker run -p 8888:8888 ghcr.io/<ваш_репозиторий>/proxy-service:latest 
+docker pull ghcr.io/rxflex/proxyservice:latest
+docker run -p 8888:8888 ghcr.io/rxflex/proxyservice:latest
