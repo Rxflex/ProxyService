@@ -36,5 +36,5 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          platforms: linux/amd64,windows/amd64
+          platforms: linux/amd64
           tags: ghcr.io/${{ env.REPO_NAME }}:latest 
