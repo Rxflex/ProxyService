@@ -26,6 +26,7 @@ A microservice for managing and distributing proxies by email ID.
   - Body: `{ "host": "string", "port": number, "username": "string", "password": "string" }`
 - `POST /api/admin/proxies/:email/rotate` - Force proxy rotation
   - Body: `{ "reason": "string" }`
+- `DELETE /api/admin/proxies/:id` - Delete a proxy
 
 ## Setup
 
@@ -56,10 +57,18 @@ To run with Docker:
 docker build -t proxy-service .
 ```
 
-2. Run the container:
+2. Run the container (default port 8888, database in container):
 ```bash
 docker run -p 8888:8888 proxy-service
 ```
+
+**To specify a custom port and mount a local database file:**
+```bash
+docker run -p 8080:8080 -e PORT=8080 -v /path/to/your/proxies.db:/app/proxies.db proxy-service
+```
+- `-p 8080:8080` — проброс порта 8080
+- `-e PORT=8080` — задать переменную окружения для порта
+- `-v /path/to/your/proxies.db:/app/proxies.db` — проброс локального файла базы данных внутрь контейнера
 
 ## Database
 
@@ -70,4 +79,27 @@ The service uses SQLite for data storage. The database file (`proxies.db`) will 
 For development with auto-reload:
 ```bash
 npm run dev
-``` 
+```
+
+## Удаление прокси
+
+Для удаления прокси используйте метод:
+
+```
+DELETE /api/admin/proxies/:id
+```
+
+- Требуется basic auth (admin).
+- Прокси не должен быть в использовании (`is_used = 0`).
+
+## Docker и CI/CD
+
+Dockerfile уже присутствует. Для автоматической сборки и публикации Docker-образа на архитектуры linux/amd64 и windows/amd64 добавлен workflow GitHub Actions (см. `.github/workflows/docker-publish.yml`).
+
+Образ публикуется в GitHub Container Registry (ghcr.io).
+
+**Пример получения и запуска образа:**
+```bash
+docker pull ghcr.io/<ваш_репозиторий>/proxy-service:latest
+# Например:
+docker run -p 8888:8888 ghcr.io/<ваш_репозиторий>/proxy-service:latest 
